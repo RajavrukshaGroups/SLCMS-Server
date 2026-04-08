@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Receipt</title>
+
+  <style>
+    body {
+      font-family: "Courier New", monospace;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+      color: #000;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    .line {
+      border-top: 1px dashed #000;
+      margin: 3px 0;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 5px;
+    }
+
+    th, td {
+      padding: 6px 0;
+      font-size: 14px;
+    }
+
+    thead tr {
+      border-bottom: 1px dashed #000;
+    }
+
+    tbody tr:last-child {
+      border-bottom: 1px dashed #000;
+    }
+
+    .right {
+      text-align: right;
+    }
+    .left{
+        text-align: left;
+    }
+
+    .mt {
+      margin-top: 15px;
+    }
+
+    /* 🔥 PRINT OPTIMIZATION */
+    @media print {
+      body {
+        padding: 0;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <div class="center bold">
+    Sri Lakshmi Group of Institutions
+  </div>
+
+  <div class="center">
+    No. 127/1, Sri Gandada Kaval, Magadi Main Road,<br />
+    Vishwaneedam Post, Bengaluru - 560091
+  </div>
+
+  <div class="center mt bold">RECEIPT</div>
+
+  <div class="line"></div>
+  <div class="line"></div>
+
+  <!-- DETAILS -->
+  <div class="row">
+    <div>Rec. No.: <%= receipt.receiptNumber %></div>
+    <div>
+      Receipt Date:
+      <%= new Date(receipt.receiptDate).toLocaleDateString('en-GB') %>
+    </div>
+  </div>
+
+  <div class="row mt">
+    <div>Name: <%= receipt.name %></div>
+    <div>Course/Year: <%= receipt.course %> <%= receipt.year %></div>
+  </div>
+
+  <div class="line"></div>
+  <div class="line"></div>
+
+  <!-- TABLE -->
+  <table>
+    <thead>
+      <tr>
+        <th class="left">Sl. No</th>
+        <th class="left">Particulars</th>
+        <th class="right">Amount</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% receipt.particulars.forEach((item, index) => { %>
+        <tr>
+          <td><%= index + 1 %></td>
+          <td><%= item.title %></td>
+          <td class="right"><%= item.amount.toLocaleString() %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <!-- TOTAL -->
+  <div class="row mt">
+    <div>Gross Total</div>
+    <div><%= receipt.totalAmount.toLocaleString() %></div>
+  </div>
+
+  <div class="row">
+    <div>Net Total</div>
+    <div><%= receipt.totalAmount.toLocaleString() %></div>
+  </div>
+
+  <div class="line"></div>
+  <div class="line"></div>
+
+  <!-- AMOUNT IN WORDS -->
+  <div class="mt">
+    Rupees <%= amountInWords %> Only
+  </div>
+
+  <!-- PAYMENT -->
+  <div class="mt">
+    Pay Mode: <%= receipt.paymentMode.toUpperCase() %>
+    <% if (receipt.referenceNumber) { %>
+      - <%= receipt.referenceNumber %>
+    <% } %>
+  </div>
+
+  <!-- NOTE -->
+  <div class="mt">
+    Note: * Fee once paid will not be refunded
+  </div>
+
+  <!-- FOOTER -->
+  <div class="mt">
+    <small>
+      * This is a system generated receipt. No signature required.
+    </small>
+  </div>
+
+</body>
+</html>
