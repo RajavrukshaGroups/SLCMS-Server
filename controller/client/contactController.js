@@ -76,21 +76,21 @@ const PostContactController = async (req, res) => {
 
     await newContact.save();
 
-    // await sendMail({
-    //   to: process.env.ADMIN_EMAIL,
-    //   subject: "📩 New Contact Form Submission",
-    //   html: `
-    //     <h2>New Contact Request</h2>
-    //     <p><strong>Name:</strong> ${fullName}</p>
-    //     <p><strong>Email:</strong> ${email}</p>
-    //     <p><strong>Mobile:</strong> ${mobile}</p>
-    //     <p><strong>Subject:</strong> ${subject}</p>
-    //     <p><strong>Course:</strong> ${course}</p>
-    //     <p><strong>Message:</strong> ${message}</p>
-    //     <hr/>
-    //     <p>This message was submitted from your website contact form.</p>
-    //   `,
-    // });
+    await sendMail({
+      to: process.env.ADMIN_EMAIL,
+      subject: "📩 New Contact Form Submission",
+      html: `
+        <h2>New Contact Request</h2>
+        <p><strong>Name:</strong> ${fullName}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Mobile:</strong> ${mobile}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Course:</strong> ${course}</p>
+        <p><strong>Message:</strong> ${message}</p>
+        <hr/>
+        <p>This message was submitted from your website contact form.</p>
+      `,
+    });
     await appendToSheet([
       fullName,
       email,
