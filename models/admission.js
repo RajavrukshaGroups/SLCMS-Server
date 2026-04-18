@@ -6,6 +6,14 @@ const admissionSchema = new mongoose.Schema(
     email: String,
     mobile: String,
     course: String,
+
+    couponCode: String,
+    discountAmount: String,
+    testAttempted: {
+      type: Boolean,
+      default: false,
+    },
+
     dob: String,
     age: String,
     gender: String,

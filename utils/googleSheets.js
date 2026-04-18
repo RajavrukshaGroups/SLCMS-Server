@@ -15,7 +15,7 @@ const appendToSheet = async (data) => {
 
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: "Sheet1!A1",
+    range: "contact form!A1",
     valueInputOption: "USER_ENTERED",
     requestBody: {
       values: [data],

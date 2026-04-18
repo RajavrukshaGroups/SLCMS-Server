@@ -10,12 +10,12 @@ const auth = new google.auth.GoogleAuth({
 
 const sheets = google.sheets({ version: "v4", auth });
 
-const appendAdmissionToGoogleSheet = async (data) => {
+const appendFeeDiscountConcession = async (data) => {
   const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
   await sheets.spreadsheets.values.append({
     spreadsheetId,
-    range: "apply now!A1",
+    range: "discount modal!A1",
     valueInputOption: "USER_ENTERED",
     requestBody: {
       values: [data],
@@ -23,4 +23,4 @@ const appendAdmissionToGoogleSheet = async (data) => {
   });
 };
 
-module.exports = appendAdmissionToGoogleSheet;
+module.exports = appendFeeDiscountConcession;
