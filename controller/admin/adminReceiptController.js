@@ -1,27 +1,79 @@
 const Receipt = require("../../models/receipt");
 const numberToWords = require("number-to-words");
 
+// const generateReceipt = async (req, res) => {
+//   try {
+//     const {
+//       receiptNumber,
+//       receiptDate,
+//       name,
+//       course,
+//       year,
+//       particulars,
+//       paymentMode,
+//       referenceNumber,
+//     } = req.body;
+
+//     const existingReceipt = await Receipt.findOne({ receiptNumber });
+//     if (existingReceipt) {
+//       return res.status(400).json({
+//         message: "Receipt number already exists",
+//       });
+//     }
+
+//     const totalAmount = particulars.reduce(
+//       (sum, item) => sum + Number(item.amount || 0),
+//       0,
+//     );
+
+//     const receipt = await Receipt.create({
+//       receiptNumber,
+//       receiptDate,
+//       name,
+//       course,
+//       year,
+//       particulars,
+//       paymentMode,
+//       referenceNumber: paymentMode === "cash" ? "" : referenceNumber,
+//       totalAmount,
+//     });
+
+//     res.status(201).json({
+//       message: "Receipt created successfully",
+//       receipt,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({
+//       message: "Error generating receipt",
+//     });
+//   }
+// };
+
 const generateReceipt = async (req, res) => {
   try {
-    const {
-      receiptNumber,
-      receiptDate,
-      name,
-      course,
-      year,
-      particulars,
-      paymentMode,
-      referenceNumber,
-    } = req.body;
+    const { receiptNumber, receiptDate, name, course, year, particulars } =
+      req.body;
 
     const existingReceipt = await Receipt.findOne({ receiptNumber });
+
     if (existingReceipt) {
       return res.status(400).json({
         message: "Receipt number already exists",
       });
     }
 
-    const totalAmount = particulars.reduce(
+    const validParticulars = (particulars || []).filter(
+      (item) => item.title && item.amount,
+    );
+
+    if (validParticulars.length === 0) {
+      return res.status(400).json({
+        message: "At least one valid particular is required",
+      });
+    }
+
+    const totalAmount = validParticulars.reduce(
       (sum, item) => sum + Number(item.amount || 0),
       0,
     );
@@ -32,9 +84,7 @@ const generateReceipt = async (req, res) => {
       name,
       course,
       year,
-      particulars,
-      paymentMode,
-      referenceNumber: paymentMode === "cash" ? "" : referenceNumber,
+      particulars: validParticulars,
       totalAmount,
     });
 
@@ -44,6 +94,7 @@ const generateReceipt = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+
     res.status(500).json({
       message: "Error generating receipt",
     });
@@ -139,6 +190,22 @@ const editReceipt = async (req, res) => {
     );
 
     // 🔥 Update
+    // const updatedReceipt = await Receipt.findByIdAndUpdate(
+    //   id,
+    //   {
+    //     receiptNumber,
+    //     receiptDate,
+    //     name,
+    //     course,
+    //     year,
+    //     particulars: validParticulars,
+    //     paymentMode,
+    //     referenceNumber: paymentMode === "cash" ? "" : referenceNumber,
+    //     totalAmount,
+    //   },
+    //   { new: true },
+    // );
+
     const updatedReceipt = await Receipt.findByIdAndUpdate(
       id,
       {
@@ -148,8 +215,6 @@ const editReceipt = async (req, res) => {
         course,
         year,
         particulars: validParticulars,
-        paymentMode,
-        referenceNumber: paymentMode === "cash" ? "" : referenceNumber,
         totalAmount,
       },
       { new: true },
@@ -214,6 +279,8 @@ const viewReceipt = async (req, res) => {
     // 👇 format name
     receipt.name = formatName(receipt.name);
 
+    console.log("receipt", receipt);
+
     res.render("receipts/paymentReceipts", {
       receipt,
       amountInWords,
@@ -257,5 +324,5 @@ module.exports = {
   editReceipt,
   getReceiptById,
   viewReceipt,
-  deleteReceipt
+  deleteReceipt,
 };

@@ -9,17 +9,25 @@ const receiptSchema = new mongoose.Schema(
     course: String,
     year: String,
 
+    // particulars: [
+    //   {
+    //     title: String,
+    //     amount: Number,
+    //   },
+    // ],
     particulars: [
       {
         title: String,
         amount: Number,
+        paymentMode: String,
+        referenceNumber: String,
       },
     ],
 
     totalAmount: Number,
 
-    paymentMode: String,
-    referenceNumber: String,
+    // paymentMode: String,
+    // referenceNumber: String,
   },
   { timestamps: true },
 );

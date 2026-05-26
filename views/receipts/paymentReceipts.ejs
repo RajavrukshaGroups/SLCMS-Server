@@ -112,16 +112,37 @@
       <tr>
         <th class="left">Sl. No</th>
         <th class="left">Particulars</th>
-        <th class="right">Amount</th>
-      </tr>
+        <!-- <th class="right">Amount</th> -->
+         <th class="right">Amount</th>
+<th class="right" style="width: 180px;">Pay Mode</th>      </tr>
     </thead>
 
     <tbody>
+      <!-- let paymentMode=receipt.paymentMode?receipt.paymentMode:"-" -->
       <% receipt.particulars.forEach((item, index) => { %>
         <tr>
           <td><%= index + 1 %></td>
           <td><%= item.title %></td>
-          <td class="right"><%= item.amount.toLocaleString() %></td>
+          <!-- <td class="right"><%= item.amount.toLocaleString() %></td> -->
+           <td class="right">
+  <%= item.amount.toLocaleString() %>
+</td>
+
+<td class="right">
+
+  <%= (
+        item.paymentMode ||
+        receipt.paymentMode ||
+        "-"
+      ).toUpperCase()
+  %>
+
+  <% if (item.referenceNumber || receipt.referenceNumber) { %>
+    -
+    <%= item.referenceNumber || receipt.referenceNumber %>
+  <% } %>
+
+</td>
         </tr>
       <% }) %>
     </tbody>
@@ -144,14 +165,6 @@
   <!-- AMOUNT IN WORDS -->
   <div class="mt">
     Rupees <%= amountInWords %> Only
-  </div>
-
-  <!-- PAYMENT -->
-  <div class="mt">
-    Pay Mode: <%= receipt.paymentMode.toUpperCase() %>
-    <% if (receipt.referenceNumber) { %>
-      - <%= receipt.referenceNumber %>
-    <% } %>
   </div>
 
   <!-- NOTE -->
