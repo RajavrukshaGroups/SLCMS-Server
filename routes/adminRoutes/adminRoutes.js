@@ -3,6 +3,7 @@ const router = express.Router();
 const protectAdmin = require("../../middleware/authMiddleware");
 const AdminLoginController = require("../../controller/admin/adminLoginController");
 const AdminReceiptController = require("../../controller/admin/adminReceiptController");
+const AdminBulkUploadReceiptsController = require("../../controller/admin/adminBulkUploadReceipt");
 
 router.post("/login", AdminLoginController.loginDetails);
 router.post("/logout", AdminLoginController.logoutDetails);
@@ -28,5 +29,9 @@ router.get(
 );
 router.get("/view-receipt/:id", AdminReceiptController.viewReceipt);
 router.delete("/delete-receipt/:id", AdminReceiptController.deleteReceipt);
+router.post(
+  "/bulk-upload-receipts",
+  AdminBulkUploadReceiptsController.adminBulkUploadPaymentData,
+);
 
 module.exports = router;
