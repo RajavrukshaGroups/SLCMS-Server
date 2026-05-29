@@ -114,7 +114,8 @@
         <th class="left">Particulars</th>
         <!-- <th class="right">Amount</th> -->
          <th class="right">Amount</th>
-<th class="right" style="width: 180px;">Pay Mode</th>      </tr>
+<!-- <th class="right" style="width: 180px;">Pay Mode</th>  -->
+     </tr>
     </thead>
 
     <tbody>
@@ -128,7 +129,7 @@
   <%= item.amount.toLocaleString() %>
 </td>
 
-<td class="right">
+<!-- <td class="right">
 
   <%= (
         item.paymentMode ||
@@ -142,7 +143,7 @@
     <%= item.referenceNumber || receipt.referenceNumber %>
   <% } %>
 
-</td>
+</td> -->
         </tr>
       <% }) %>
     </tbody>
@@ -167,6 +168,59 @@
     Rupees <%= amountInWords %> Only
   </div>
 
+  <div class="line"></div>
+
+<div class="mt">
+  <strong>Payment Details</strong>
+</div>
+
+<%
+let paymentRows = [];
+
+if (receipt.paymentBreakup?.length) {
+  // NEW RECEIPTS
+  paymentRows = receipt.paymentBreakup;
+} else {
+  // OLD RECEIPTS
+
+  const firstParticular =
+    receipt.particulars?.[0] || {};
+
+  paymentRows = [{
+    paymentMode:
+      firstParticular.paymentMode ||
+      receipt.paymentMode ||
+      "-",
+
+    amount: receipt.totalAmount,
+
+    referenceNumber:
+      firstParticular.referenceNumber ||
+      receipt.referenceNumber ||
+      ""
+  }];
+}
+%>
+
+<% paymentRows.forEach((payment) => { %>
+
+<div class="row">
+  <div>
+    Pay Mode:
+    <!-- <%= payment.paymentMode.toUpperCase() %> -->
+     <%= (payment.paymentMode || "-").toUpperCase() %>
+
+    <% if (payment.referenceNumber) { %>
+      (Ref: <%= payment.referenceNumber %>)
+    <% } %>
+  </div>
+
+  <div>
+    ₹ <%= Number(payment.amount).toLocaleString() %>
+  </div>
+</div>
+
+<% }) %>
   <!-- NOTE -->
   <div class="mt">
   <strong>Note: * Fee once paid will not be refunded</strong>

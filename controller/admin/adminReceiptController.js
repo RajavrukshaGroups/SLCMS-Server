@@ -1,5 +1,7 @@
 const Receipt = require("../../models/receipt");
 const numberToWords = require("number-to-words");
+const addReceiptToSheet = require("../../utils/addReceiptToSheet");
+const updateReceiptInSheet = require("../../utils/updateReceiptInSheet");
 
 // const generateReceipt = async (req, res) => {
 //   try {
@@ -52,8 +54,15 @@ const numberToWords = require("number-to-words");
 
 const generateReceipt = async (req, res) => {
   try {
-    const { receiptNumber, receiptDate, name, course, year, particulars } =
-      req.body;
+    const {
+      receiptNumber,
+      receiptDate,
+      name,
+      course,
+      year,
+      particulars,
+      paymentBreakup,
+    } = req.body;
 
     const existingReceipt = await Receipt.findOne({ receiptNumber });
 
@@ -84,9 +93,16 @@ const generateReceipt = async (req, res) => {
       name,
       course,
       year,
+      paymentBreakup,
       particulars: validParticulars,
       totalAmount,
     });
+    try {
+      await addReceiptToSheet(receipt);
+    } catch (sheetError) {
+      console.error("google sheet sync failed");
+      sheetError;
+    }
 
     res.status(201).json({
       message: "Receipt created successfully",
@@ -150,6 +166,7 @@ const editReceipt = async (req, res) => {
       particulars,
       paymentMode,
       referenceNumber,
+      paymentBreakup,
     } = req.body;
 
     // 🔥 Check if receipt exists
@@ -216,9 +233,15 @@ const editReceipt = async (req, res) => {
         year,
         particulars: validParticulars,
         totalAmount,
+        paymentBreakup,
       },
       { new: true },
     );
+    try {
+      await updateReceiptInSheet(updatedReceipt);
+    } catch (err) {
+      console.error("Sheet Update Failed", err);
+    }
 
     res.status(200).json({
       message: "Receipt updated successfully",

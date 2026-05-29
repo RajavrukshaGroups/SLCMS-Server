@@ -24,6 +24,10 @@ const receiptSchema = new mongoose.Schema(
       },
     ],
 
+    paymentBreakup: [
+      { paymentMode: String, amount: Number, referenceNumber: String },
+    ],
+
     totalAmount: Number,
 
     // paymentMode: String,
