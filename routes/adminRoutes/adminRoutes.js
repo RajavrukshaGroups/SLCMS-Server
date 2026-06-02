@@ -4,6 +4,7 @@ const protectAdmin = require("../../middleware/authMiddleware");
 const AdminLoginController = require("../../controller/admin/adminLoginController");
 const AdminReceiptController = require("../../controller/admin/adminReceiptController");
 const AdminBulkUploadReceiptsController = require("../../controller/admin/adminBulkUploadReceipt");
+const AdminDashboardController = require("../../controller/admin/adminDashboardController");
 
 router.post("/login", AdminLoginController.loginDetails);
 router.post("/logout", AdminLoginController.logoutDetails);
@@ -33,5 +34,9 @@ router.post(
   "/bulk-upload-receipts",
   AdminBulkUploadReceiptsController.adminBulkUploadPaymentData,
 );
-
+router.get(
+  "/dashboard-api",
+  protectAdmin,
+  AdminDashboardController.AdminCalulateRevenueGenerated,
+);
 module.exports = router;
