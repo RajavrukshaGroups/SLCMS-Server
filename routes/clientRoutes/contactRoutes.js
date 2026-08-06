@@ -7,5 +7,6 @@ router.post("/submit-admission", ContactController.submitAdmission);
 router.post("/check-admission", ContactController.checkAdmission);
 router.post("/submit-quiz", ContactController.submitQuizAdmission);
 router.post("/bca-admission", ContactController.bcaLeadGateForm);
+router.post("/mba-mca-admission", ContactController.mbaMcaLeadGateEnquiryForm);
 
 module.exports = router;

@@ -8,6 +8,7 @@ const appendAdmissionToGoogleSheet = require("../../utils/appendAdmissionToGoogl
 const contact = require("../../models/contact");
 const appendFeeDiscountConcession = require("../../utils/appendFeeDiscountConcession");
 const sendBcaLandingPageMail = require("../../utils/sendBcaLandingPageMail");
+const sendMbaMcaLandingPageMail = require("../../utils/sendMbaMcaLandingPageMail");
 
 const PostContactController = async (req, res) => {
   try {
@@ -618,6 +619,308 @@ const bcaLeadGateForm = async (req, res) => {
   }
 };
 
+const mbaMcaLeadGateEnquiryForm = async (req, res) => {
+  try {
+    const {
+      fullName,
+      email,
+      mobile,
+      program,
+      city,
+      consentAccepted,
+      formType = "MBA & MCA Admission Enquiry",
+      tracking = {},
+    } = req.body;
+
+    /* ===============================
+       REQUIRED FIELD VALIDATION
+    ============================== */
+
+    if (
+      !fullName?.trim() ||
+      !email?.trim() ||
+      !mobile?.trim() ||
+      !program?.trim() ||
+      !city?.trim()
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required details.",
+      });
+    }
+
+    if (consentAccepted !== true) {
+      return res.status(400).json({
+        success: false,
+        message: "Consent is required.",
+      });
+    }
+
+    /* ===============================
+       NORMALIZE DATA
+    ============================== */
+
+    const normalizedName = fullName.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedMobile = mobile.replace(/\D/g, "");
+    const normalizedProgram = program.trim().toUpperCase();
+    const normalizedCity = city.trim();
+
+    /* ===============================
+       FORMAT VALIDATION
+    ============================== */
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const mobileRegex = /^[6-9]\d{9}$/;
+    const allowedPrograms = ["MBA", "MCA"];
+
+    if (!emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address.",
+      });
+    }
+
+    if (!mobileRegex.test(normalizedMobile)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid 10-digit Indian mobile number.",
+      });
+    }
+
+    if (!allowedPrograms.includes(normalizedProgram)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select either MBA or MCA.",
+      });
+    }
+
+    /* ===============================
+       ESCAPE HTML
+    ============================== */
+
+    const escapeHtml = (value = "") =>
+      String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    const safeName = escapeHtml(normalizedName);
+    const safeEmail = escapeHtml(normalizedEmail);
+    const safeMobile = escapeHtml(normalizedMobile);
+    const safeProgram = escapeHtml(normalizedProgram);
+    const safeCity = escapeHtml(normalizedCity);
+    const safeFormType = escapeHtml(formType);
+
+    /* ===============================
+       TRACKING INFORMATION
+    ============================== */
+
+    const submittedAt =
+      tracking.submittedAt ||
+      new Date().toLocaleString("en-IN", {
+        timeZone: "Asia/Kolkata",
+      });
+
+    const safeSource = escapeHtml(tracking.source || "Direct");
+    const safeMedium = escapeHtml(tracking.medium || "Not Available");
+    const safeCampaign = escapeHtml(tracking.campaign || "Not Available");
+    const safeContent = escapeHtml(tracking.content || "Not Available");
+    const safeTerm = escapeHtml(tracking.term || "Not Available");
+    const safeGclid = escapeHtml(tracking.gclid || "Not Available");
+    const safeFbclid = escapeHtml(tracking.fbclid || "Not Available");
+    const safeLandingPage = escapeHtml(tracking.landingPage || "Not Available");
+    const safeSubmittedAt = escapeHtml(submittedAt);
+
+    /* ===============================
+       SEND MBA/MCA LANDING PAGE EMAIL
+    ============================== */
+
+    await sendMbaMcaLandingPageMail({
+      to: process.env.BCALANDINGPAGEEMAIL,
+      replyTo: normalizedEmail,
+      subject: `${normalizedProgram} Admission Enquiry - ${normalizedName}`,
+      html: `
+        <div style="
+          margin: 0;
+          padding: 24px;
+          background: #f4f7f5;
+          font-family: Arial, Helvetica, sans-serif;
+          color: #1e293b;
+        ">
+          <div style="
+            max-width: 680px;
+            margin: 0 auto;
+            overflow: hidden;
+            border: 1px solid #dce7df;
+            border-radius: 18px;
+            background: #ffffff;
+          ">
+            <div style="
+              padding: 24px;
+              background: linear-gradient(135deg, #073f43, #087f83);
+              color: #ffffff;
+            ">
+              <p style="
+                margin: 0 0 8px;
+                color: #f0d956;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: 1.4px;
+                text-transform: uppercase;
+              ">
+                SLCMS MBA &amp; MCA Admissions
+              </p>
+
+              <h2 style="
+                margin: 0;
+                font-size: 24px;
+                line-height: 1.3;
+              ">
+                ${safeFormType}
+              </h2>
+            </div>
+
+            <div style="padding: 24px;">
+              <table
+                cellpadding="0"
+                cellspacing="0"
+                style="
+                  width: 100%;
+                  border-collapse: collapse;
+                "
+              >
+                <tr>
+                  <td style="
+                    width: 180px;
+                    padding: 10px 0;
+                    font-weight: 700;
+                    color: #475569;
+                    vertical-align: top;
+                  ">
+                    Student Name
+                  </td>
+
+                  <td style="padding: 10px 0;">
+                    ${safeName}
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="
+                    padding: 10px 0;
+                    font-weight: 700;
+                    color: #475569;
+                    vertical-align: top;
+                  ">
+                    Email
+                  </td>
+
+                  <td style="padding: 10px 0;">
+                    <a
+                      href="mailto:${safeEmail}"
+                      style="
+                        color: #087f83;
+                        text-decoration: none;
+                      "
+                    >
+                      ${safeEmail}
+                    </a>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="
+                    padding: 10px 0;
+                    font-weight: 700;
+                    color: #475569;
+                    vertical-align: top;
+                  ">
+                    Mobile
+                  </td>
+
+                  <td style="padding: 10px 0;">
+                    <a
+                      href="tel:+91${safeMobile}"
+                      style="
+                        color: #087f83;
+                        text-decoration: none;
+                      "
+                    >
+                      +91 ${safeMobile}
+                    </a>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="
+                    padding: 10px 0;
+                    font-weight: 700;
+                    color: #475569;
+                    vertical-align: top;
+                  ">
+                    Program Interested
+                  </td>
+
+                  <td style="padding: 10px 0;">
+                    <strong>${safeProgram}</strong>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="
+                    padding: 10px 0;
+                    font-weight: 700;
+                    color: #475569;
+                    vertical-align: top;
+                  ">
+                    City
+                  </td>
+
+                  <td style="padding: 10px 0;">
+                    ${safeCity}
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="
+                    padding: 10px 0;
+                    font-weight: 700;
+                    color: #475569;
+                    vertical-align: top;
+                  ">
+                    Consent Accepted
+                  </td>
+
+                  <td style="padding: 10px 0;">
+                    Yes
+                  </td>
+                </tr>
+              </table>
+
+            </div>
+          </div>
+        </div>
+      `,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message:
+        "Your details have been submitted successfully. Our admission team will contact you shortly.",
+    });
+  } catch (error) {
+    console.error("MBA/MCA Admission Enquiry Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to submit your details. Please try again later.",
+    });
+  }
+};
+
 module.exports = {
   PostContactController,
   submitAdmission,
@@ -625,4 +928,5 @@ module.exports = {
   discountModalContactForm,
   submitQuizAdmission,
   bcaLeadGateForm,
+  mbaMcaLeadGateEnquiryForm,
 };
